@@ -1,0 +1,27 @@
+# config file for verisign properties - example and for dev purposes
+keystore:
+  keystorePath: 'c:\temp\signcert.p12'
+  keystorePass: ''
+  alias: 'avast-sign'
+verification:
+  # http response code
+  errorHttpResponseCode: 400
+
+  #  Message which is added to the error response to help user resolve problem
+  additionalErrorMessage: |
+    Go to https://butr.avast.com/avast/signing for more help.
+
+  # for which extensions should be used JAR verification
+  verifyJarExtensions:
+    - jar
+    - aar
+
+  # enable verification only for these Ant paths only, apply for all if empty/not defined
+  # verification is applied only for both enabled & not ignored paths
+#  enabledPath:
+#    - 'maven-local-local/com/avast/android/**'
+
+  # Ant path matching, see https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/util/AntPathMatcher.html
+  ignorePath:
+    - '**/*-sources.jar'
+    - '**/*-javadoc.jar'
