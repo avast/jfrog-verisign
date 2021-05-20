@@ -1,9 +1,9 @@
-.gradle
+/.gradle/
 /build/
 /target/
 /.teamcity/target/
 !gradle/wrapper/gradle-wrapper.jar
-decompile
+/decompile/
 
 ### STS ###
 .apt_generated
