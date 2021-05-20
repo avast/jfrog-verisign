@@ -56,8 +56,6 @@ compileJava {
     ])
 }
 
-def artifactoryPath = "c:\\App\\artifactory-pro-7.18.6\\var\\etc\\artifactory"
-
 def libsToCopy = copySpec {
     from "build/libs"
     include "*.jar"
@@ -75,7 +73,7 @@ def propertiesToCopy = copySpec {
 
 
 task deploy (dependsOn: build, type: Copy) {
-    into artifactoryPath
+    into findProperty("artifactoryPath")
     into('plugins/lib') {
         with libsToCopy
     }

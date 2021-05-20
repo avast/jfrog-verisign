@@ -1,0 +1,89 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://xyzid.avast.com/object1619081476.json",
+  "title": "Verisign schema",
+  "type": "object",
+  "properties": {
+    "keystore": {
+      "type": "object",
+      "properties": {
+        "keystorePath": {
+          "description": "Path to keystore PKCS12 file.",
+          "type": "string",
+          "default": ""
+        },
+        "keystorePass": {
+          "description": "Path to keystore password. It cannot be null",
+          "type": "string",
+          "default": ""
+        },
+        "alias": {
+          "description": "Key alias(friendly name) in the keystore file",
+          "type": "string",
+          "default": ""
+        }
+      },
+      "required": [
+        "keystorePath",
+        "keystorePass",
+        "alias"
+      ]
+    },
+    "verification": {
+      "type": "object",
+      "properties": {
+        "errorHttpResponseCode": {
+          "type": "integer",
+          "minimum": 200,
+          "maximum": 600,
+          "description": "http response code for error code"
+        },
+        "enableJarVerification": {
+          "type": "boolean",
+          "description": "True if plugin feature should be enabled",
+          "default": true
+        },
+        "enableRpmVerification": {
+          "type": "boolean",
+          "description": "True if plugin feature should be enabled",
+          "default": true
+        },
+        "additionalErrorMessage": {
+          "type": "string",
+          "description": "Message which is added to the error response to help user resolve problem",
+          "default": ""
+        },
+        "verifyJarExtensions": {
+          "type": "array",
+          "description": "for which extensions should be used JAR verification",
+          "items": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "enabledPath": {
+          "type": "array",
+          "description": "enable verification only for these Ant paths only, apply for all if empty/not defined. Verification is applied only for both enabled & not ignored paths. Ant path matching, see https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/util/AntPathMatcher.html",
+          "items": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "ignorePath": {
+          "description": "These paths are being ignored from verification. Ant path matching, see https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/util/AntPathMatcher.html",
+          "type": "array",
+          "items": [
+            {
+              "type": "string"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "required": [
+    "verification"
+  ]
+}
