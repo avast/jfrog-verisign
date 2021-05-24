@@ -48,6 +48,11 @@
           "description": "True if plugin feature should be enabled",
           "default": true
         },
+        "caseSensitive": {
+          "type": "boolean",
+          "description": "Whether the paths should be considered in case-sensitive manner",
+          "default": true
+        },
         "additionalErrorMessage": {
           "type": "string",
           "description": "Message which is added to the error response to help user resolve problem",
