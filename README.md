@@ -58,11 +58,28 @@ For the steps 1-3 you can use `./gradlew deploy` task, which makes these steps 1
 1. Copy `jfrog-verisign.jar` (located in `/build/libs`) into JFrog's `var\etc\artifactory\plugins\lib` directory
 2. Copy `verisign.groovy` (located in `/src/main/groovy`) into JFrog's `var\etc\artifactory\plugins`  directory
 3. Copy `verisign.yaml` (located in `/etc/verisign.yaml`) into JFrog's `var\etc\artifactory\plugins`  directory
-4. Define keystore file (for the JAR verification) and public PGP keys (for RPM verification, use command `rpm --import rpm.gpg.public`) on the JFrog's machines
+4. Define keystore file (for the JAR verification) and public PGP keys (for RPM verification, eg. use command `rpm --import re.rpm.gpg.public`) on the JFrog's machines
 5. Update `verisign.yaml` according to your needs
-6. Restart JFrog
+6. Update `logback.xml` configuration (located at JFrog's `/var/etc/artifactory/logback.xml`) with custom log levels
+   ```xml
+    <logger name="verisign">
+        <level value="debug"/>
+    </logger>
+
+    <logger name="com.server.avast.verisign" level="debug">
+    </logger>
+   ```
+7. Restart JFrog
 
 
 ## Verisign.yaml file
-It's recommended to link your `verisign.yaml` file with this [schema](/etc/verisign-schema.json), it can help you fix typos and to give you more hints (via ctrl/cmd+space).
+See this [example plugin configuration](/etc/verisign.yaml) file.  
+It's recommended to link your [`verisign.yaml`](/etc/verisign.yaml) file with this [schema](/etc/verisign-schema.json), it can help you fix typos and to give you more hints (via ctrl/cmd+space).
 See this [tutorial](https://www.jetbrains.com/help/idea/2021.1/json.html?utm_source=product&utm_medium=link&utm_campaign=IU&utm_content=2021.1#ws_json_schema_add_custom).
+
+### Configuration file reload
+To reload verisign.yaml you can simply call this `curl` command
+```
+curl -X GET -v -u admin:password "http://localhost:8080/artifactory/api/plugins/execute/refreshVerisignConfig"
+```
+

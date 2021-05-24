@@ -4,6 +4,8 @@ keystore:
   keystorePass: ''
   alias: 'avast-sign'
 verification:
+  caseSensitive: false
+
   # http response code
   errorHttpResponseCode: 400
 

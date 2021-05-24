@@ -6,6 +6,7 @@ import com.server.avast.verisign.config.properties.VerificationProperties;
 import com.server.avast.verisign.jarsigner.VerifyResult;
 import com.server.avast.verisign.utils.JarSignerUtils;
 import com.server.avast.verisign.utils.RpmVerifier;
+import org.apache.commons.lang.StringUtils;
 import org.artifactory.api.context.ArtifactoryContext;
 import org.artifactory.exception.CancelException;
 import org.artifactory.fs.ItemInfo;
@@ -52,6 +53,9 @@ public class VerificationService {
         logger.debug("Verify file path: {}", path);
 
         final VerificationProperties verification = config.getProperties().getVerification();
+        final boolean caseSensitive = verification.isCaseSensitive();
+        antPathMatcher.setCaseSensitive(caseSensitive);
+
         final boolean enabledPath = verification.getEnabledPath().isEmpty() ||
                 verification.getEnabledPath().stream().anyMatch(pattern -> antPathMatcher.match(pattern, path));
 
@@ -65,13 +69,13 @@ public class VerificationService {
         if (enabledPath) {
             if (verification.isEnableJarVerification()) {
                 final boolean hasJarSupportedExtension = verification.getVerifyJarExtensions().stream().
-                        anyMatch(extension -> path.endsWith("." + extension));
+                        anyMatch(extension -> endsWithCaseSensitive(caseSensitive, path, "." + extension));
                 if (hasJarSupportedExtension) {
                     verifyJar(repoPath, path);
                 }
             } else {
                 if (verification.isEnableRpmVerification()) {
-                    if (path.endsWith(".rpm")) {
+                    if (endsWithCaseSensitive(caseSensitive, path, ".rpm")) {
                         verifyRpm(repoPath, path);
                     }
                 } else {
@@ -79,6 +83,10 @@ public class VerificationService {
                 }
             }
         }
+    }
+
+    private static boolean endsWithCaseSensitive(boolean caseSensitive, String path, String endsWith) {
+        return caseSensitive ? path.endsWith(endsWith) : StringUtils.endsWithIgnoreCase(path, endsWith);
     }
 
     private void verifyRpm(RepoPath repoPath, String path) {

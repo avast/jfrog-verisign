@@ -12,6 +12,8 @@ public class VerificationProperties {
     private String additionalErrorMessage;
     private boolean enableJarVerification = true;
     private boolean enableRpmVerification = true;
+    private boolean caseSensitive = true;
+
     private String rpmCommand = "rpm -Kv";
     private List<String> ignorePath = Collections.emptyList();
     private List<String> enabledPath = Collections.emptyList();
@@ -79,5 +81,13 @@ public class VerificationProperties {
 
     public void setEnableRpmVerification(boolean enableRpmVerification) {
         this.enableRpmVerification = enableRpmVerification;
+    }
+
+    public boolean isCaseSensitive() {
+        return caseSensitive;
+    }
+
+    public void setCaseSensitive(boolean caseSensitive) {
+        this.caseSensitive = caseSensitive;
     }
 }

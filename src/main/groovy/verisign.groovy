@@ -17,10 +17,10 @@ executions {
             status = 200
         } catch (Exception e) {
             log.error("Failed to reload Verisign plugin config from path ${PROPERTIES_FILE_PATH}", e)
-            final Map<String, Object> map = new HashMap<>();
-            map.put("result", "FAILED");
-            map.put("errorMessage", e.getMessage());
-            message = new ObjectMapper().writeValueAsString(map);
+            final Map<String, Object> map = new HashMap<>()
+            map.put("result", "FAILED")
+            map.put("errorMessage", e.getMessage())
+            message = new ObjectMapper().writeValueAsString(map)
             status = 500
         }
     }
