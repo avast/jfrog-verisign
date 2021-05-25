@@ -9,7 +9,7 @@ import org.artifactory.fs.ItemInfo
 @Field VerificationService verificationSupport = new VerificationService(config, repositories, ctx)
 
 executions {
-    refreshVerisignConfig(version: '1.0', httpMethod: 'GET') { params ->
+    refreshVerisignConfig(version: '1.0', httpMethod: 'GET', users:["admin"],  groups:["verisign"]) { params ->
         log.info("Verisign - Reloading config from path ${PROPERTIES_FILE_PATH}")
         try {
             config.reload()
@@ -24,12 +24,24 @@ executions {
             status = 500
         }
     }
+
+    verisignConfig(version: '1.0', httpMethod: 'GET', users:["admin"],  groups:["verisign"]) {  params ->
+        final Map<String, Object> map = new HashMap<>()
+
+        def verification = config.getProperties().getVerification()
+        map.put("enabledPath", verification.getEnabledPath())
+        map.put("ignorePath", verification.getIgnorePath())
+        message = new ObjectMapper().writeValueAsString(map)
+        status = 200
+    }
 }
 
 storage {
     afterCreate { ItemInfo item ->
         if (!item.isFolder()) {
-            verificationSupport.verify(item)
+            asSystem {
+                verificationSupport.verify(item)
+            }
         }
     }
 }

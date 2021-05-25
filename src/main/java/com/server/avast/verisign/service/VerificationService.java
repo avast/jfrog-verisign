@@ -43,6 +43,10 @@ public class VerificationService {
         rpmVerifier = new RpmVerifier(config);
     }
 
+    private static boolean endsWithCaseSensitive(boolean caseSensitive, String path, String endsWith) {
+        return caseSensitive ? path.endsWith(endsWith) : StringUtils.endsWithIgnoreCase(path, endsWith);
+    }
+
     public void verify(ItemInfo itemInfo) {
         final RepoPath repoPath = itemInfo.getRepoPath();
         if (itemInfo.isFolder() || !repoPath.isFile()) {
@@ -59,34 +63,33 @@ public class VerificationService {
         final boolean enabledPath = verification.getEnabledPath().isEmpty() ||
                 verification.getEnabledPath().stream().anyMatch(pattern -> antPathMatcher.match(pattern, path));
 
-        final Optional<String> ignoredByPrefix = verification.getIgnorePath().stream().
-                filter(ignorePath -> antPathMatcher.match(ignorePath, path)).findAny();
-        if (ignoredByPrefix.isPresent()) {
-            logger.debug("Verification ignored by Ant path for {} with pattern {}", repoPath.toPath(), ignoredByPrefix.get());
+        if (!enabledPath) {
+            logger.debug("Verification is not enabled for this repo path {}", path);
             return;
         }
 
-        if (enabledPath) {
-            if (verification.isEnableJarVerification()) {
-                final boolean hasJarSupportedExtension = verification.getVerifyJarExtensions().stream().
-                        anyMatch(extension -> endsWithCaseSensitive(caseSensitive, path, "." + extension));
-                if (hasJarSupportedExtension) {
-                    verifyJar(repoPath, path);
+        final Optional<String> ignoredByPath = verification.getIgnorePath().stream().
+                filter(ignorePath -> antPathMatcher.match(ignorePath, path)).findAny();
+        if (ignoredByPath.isPresent()) {
+            logger.debug("Verification ignored by Ant path for {} with pattern {}", repoPath.toPath(), ignoredByPath.get());
+            return;
+        }
+
+        if (verification.isEnableJarVerification()) {
+            final boolean hasJarSupportedExtension = verification.getVerifyJarExtensions().stream().
+                    anyMatch(extension -> endsWithCaseSensitive(caseSensitive, path, "." + extension));
+            if (hasJarSupportedExtension) {
+                verifyJar(repoPath, path);
+            }
+        } else {
+            if (verification.isEnableRpmVerification()) {
+                if (endsWithCaseSensitive(caseSensitive, path, ".rpm")) {
+                    verifyRpm(repoPath, path);
                 }
             } else {
-                if (verification.isEnableRpmVerification()) {
-                    if (endsWithCaseSensitive(caseSensitive, path, ".rpm")) {
-                        verifyRpm(repoPath, path);
-                    }
-                } else {
-                    logger.debug("Rpm verification is disabled");
-                }
+                logger.debug("Rpm verification is disabled");
             }
         }
-    }
-
-    private static boolean endsWithCaseSensitive(boolean caseSensitive, String path, String endsWith) {
-        return caseSensitive ? path.endsWith(endsWith) : StringUtils.endsWithIgnoreCase(path, endsWith);
     }
 
     private void verifyRpm(RepoPath repoPath, String path) {
