@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -27,6 +28,12 @@ public class RpmVerifier {
 
     public RpmVerifier(Config config) {
         this.config = config;
+    }
+
+    public static void main(String[] args) {
+        final RpmVerifier rpmVerifier = new RpmVerifier(new Config(new File("etc/verisign.yaml")));
+        final VerifyResult verifyResult = rpmVerifier.verify(new File(args[0]));
+        System.out.println("verifyResult = " + verifyResult);
     }
 
     public VerifyResult verifyWithTempFile(ResourceStreamHandle resourceStreamHandle) throws IOException {
@@ -84,12 +91,12 @@ public class RpmVerifier {
     }
 
     private String[] getRpmCommand() {
-        return config.getProperties().getVerification().getRpmCommand().split(" ");
+        return config.getProperties().getVerification().getRpm().getRpmCommand().split(" ");
     }
 
     @NotNull
     private VerifyResult parseRpmProcessOutput(Process process) throws InterruptedException, IOException {
-        if (process.waitFor(30, TimeUnit.SECONDS)) {
+        if (process.waitFor(20, TimeUnit.SECONDS)) {
             final List<String> response = IOUtils.readLines(process.getInputStream(), StandardCharsets.UTF_8);
             final VerifyResult verifyResult = new VerifyResult();
             if (process.exitValue() != 0) {
@@ -97,12 +104,17 @@ public class RpmVerifier {
                 errors.add("RPM signature verification failed");
                 errors.addAll(response);
             } else {
-                final boolean isSigned = response.stream().skip(1).anyMatch(line -> line.contains("Signature, key ID"));
+                // result code is 0 - ALL OK
+                final List<String> pgpKeyIds = config.getProperties().getVerification().getRpm().getPgpKeyIds();
+                final boolean isSigned = response.stream().skip(1).filter(line -> {
+                    final String lineUpperCase = line.toUpperCase(Locale.ENGLISH);
+                    return pgpKeyIds.stream().anyMatch(key -> lineUpperCase.contains(("Signature, key ID " + key + ": OK").toUpperCase(Locale.ENGLISH)));
+                }).count() == 2;// header and body
                 if (isSigned) {
                     verifyResult.getInfo().addAll(response);
                 } else {
                     final List<String> errors = verifyResult.getErrors();
-                    errors.add("RPM file is not signed");
+                    errors.add("RPM file is not signed by given keys " + String.join(",", pgpKeyIds));
                     errors.addAll(response);
                 }
             }
@@ -110,12 +122,6 @@ public class RpmVerifier {
         } else {
             throw new RuntimeException("Failed to run RPM utility to verify RPM - timeout");
         }
-    }
-
-    public static void main(String[] args) {
-        final RpmVerifier rpmVerifier = new RpmVerifier(new Config(new File("etc/verisign.yaml")));
-        final VerifyResult verifyResult = rpmVerifier.verify(new File(args[0]));
-        System.out.println("verifyResult = " + verifyResult);
     }
 
 }

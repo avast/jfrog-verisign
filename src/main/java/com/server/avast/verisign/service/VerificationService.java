@@ -2,17 +2,18 @@ package com.server.avast.verisign.service;
 
 import com.server.avast.verisign.config.Config;
 import com.server.avast.verisign.config.properties.KeystoreProperties;
+import com.server.avast.verisign.config.properties.PathProperties;
 import com.server.avast.verisign.config.properties.VerificationProperties;
 import com.server.avast.verisign.jarsigner.VerifyResult;
 import com.server.avast.verisign.utils.JarSignerUtils;
 import com.server.avast.verisign.utils.RpmVerifier;
 import org.apache.commons.lang.StringUtils;
 import org.artifactory.api.context.ArtifactoryContext;
+import org.artifactory.api.repo.RepositoryService;
 import org.artifactory.exception.CancelException;
 import org.artifactory.fs.ItemInfo;
 import org.artifactory.repo.RepoPath;
 import org.artifactory.repo.Repositories;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.AntPathMatcher;
@@ -21,7 +22,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * @author Vitasek L.
@@ -33,6 +36,7 @@ public class VerificationService {
     private final File dataDir;
     private final AntPathMatcher antPathMatcher;
     private final RpmVerifier rpmVerifier;
+    private final RepositoryService repositoryService;
 
     public VerificationService(Config config, Repositories repositories, ArtifactoryContext artifactoryContext) {
         this.config = config;
@@ -41,6 +45,7 @@ public class VerificationService {
         antPathMatcher = new AntPathMatcher("/");
         antPathMatcher.setCachePatterns(true);
         rpmVerifier = new RpmVerifier(config);
+        repositoryService = artifactoryContext.getRepositoryService();
     }
 
     private static boolean endsWithCaseSensitive(boolean caseSensitive, String path, String endsWith) {
@@ -53,37 +58,43 @@ public class VerificationService {
             return;
         }
 
+        verifyPath(repoPath);
+    }
+
+    private void verifyPath(RepoPath repoPath) {
         final String path = repoPath.toPath();
         logger.debug("Verify file path: {}", path);
 
         final VerificationProperties verification = config.getProperties().getVerification();
-        final boolean caseSensitive = verification.isCaseSensitive();
-        antPathMatcher.setCaseSensitive(caseSensitive);
+        final PathProperties paths = verification.getPaths();
 
-        final boolean enabledPath = verification.getEnabledPath().isEmpty() ||
-                verification.getEnabledPath().stream().anyMatch(pattern -> antPathMatcher.match(pattern, path));
+        antPathMatcher.setCaseSensitive(paths.isCaseSensitive());
+
+        final boolean enabledPath = paths.getEnabledPath().isEmpty() ||
+                expandVirtualRepositoriesToLocalIfEnabled(paths.getEnabledPath()).
+                        anyMatch(pattern -> antPathMatcher.match(pattern, path));
 
         if (!enabledPath) {
             logger.debug("Verification is not enabled for this repo path {}", path);
             return;
         }
 
-        final Optional<String> ignoredByPath = verification.getIgnorePath().stream().
+        final Optional<String> ignoredByPath = expandVirtualRepositoriesToLocalIfEnabled(paths.getIgnorePath()).
                 filter(ignorePath -> antPathMatcher.match(ignorePath, path)).findAny();
         if (ignoredByPath.isPresent()) {
             logger.debug("Verification ignored by Ant path for {} with pattern {}", repoPath.toPath(), ignoredByPath.get());
             return;
         }
 
-        if (verification.isEnableJarVerification()) {
-            final boolean hasJarSupportedExtension = verification.getVerifyJarExtensions().stream().
-                    anyMatch(extension -> endsWithCaseSensitive(caseSensitive, path, "." + extension));
+        if (verification.getJar().isEnabled()) {
+            final boolean hasJarSupportedExtension = verification.getJar().getExtensions().stream().
+                    anyMatch(extension -> endsWithCaseSensitive(paths.isCaseSensitive(), path, "." + extension));
             if (hasJarSupportedExtension) {
                 verifyJar(repoPath, path);
             }
         } else {
-            if (verification.isEnableRpmVerification()) {
-                if (endsWithCaseSensitive(caseSensitive, path, ".rpm")) {
+            if (verification.getRpm().isEnabled()) {
+                if (endsWithCaseSensitive(paths.isCaseSensitive(), path, ".rpm")) {
                     verifyRpm(repoPath, path);
                 }
             } else {
@@ -106,6 +117,8 @@ public class VerificationService {
                 throw new CancelException("Failed to verify RPM artifact: " + path +
                         " . Error(s): " + result.joinErrors() + additionalMessage,
                         verification.getErrorHttpResponseCode());
+            } else {
+                logger.debug("RPM artifact with repopath {} is verified succesfuly", path);
             }
         } catch (IOException e) {
             logger.error("Failed to verify RPM file {}", path, e);
@@ -117,7 +130,7 @@ public class VerificationService {
         logger.info("Going to verify JAR repopath {}", path);
 
         try {
-            final KeystoreProperties keystore = config.getProperties().getKeystore();
+            final KeystoreProperties keystore = config.getProperties().getVerification().getJar().getKeystore();
             final File file = getPhysicalPath(repoPath);
             final VerifyResult result = file.exists() ?
                     JarSignerUtils.verify(file, keystore) :
@@ -130,6 +143,8 @@ public class VerificationService {
                 throw new CancelException("Failed to verify JAR artifact: " + path +
                         " . Error(s): " + result.joinErrors() + additionalMessage,
                         verification.getErrorHttpResponseCode());
+            } else {
+                logger.debug("JAR artifact with repopath {} is verified succesfuly", path);
             }
         } catch (IOException e) {
             logger.error("Failed to verify JAR file {}", path, e);
@@ -137,12 +152,42 @@ public class VerificationService {
         }
     }
 
-    @NotNull
     private File getPhysicalPath(RepoPath repoPath) {
         final String sha1 = repositories.getFileInfo(repoPath).getChecksumsInfo().getSha1();
         final String shaPrefix = sha1.substring(0, 2);
         final Path physicicalPath = Paths.get(dataDir.getAbsolutePath(), "filestore", shaPrefix, sha1);
 
         return physicicalPath.toFile();
+    }
+
+    private Stream<String> expandVirtualRepositoriesToLocalIfEnabled(final List<String> antPaths) {
+        if (config.getProperties().getVerification().getPaths().isExpandVirtualReposToLocal()) {
+            return antPaths.stream().flatMap(antPath -> {
+                final String repoKeyPrefix = StringUtils.substringBefore(antPath, "/");
+                return getLocalRepositories(repoKeyPrefix).distinct().map(localRepo -> StringUtils.replaceOnce(antPath, repoKeyPrefix, localRepo));
+            });
+        }
+        return antPaths.stream();
+    }
+
+    private Stream<String> getLocalRepositories(final String repoKeyPrefix) {
+        if (isVirtualRepo(repoKeyPrefix)) {
+            return repositoryService.virtualRepoDescriptorByKey(repoKeyPrefix).getRepositories().stream().
+                    flatMap(descriptor -> {
+                        if (descriptor.isReal()) {
+                            return Stream.of(descriptor.getKey());
+                        }
+                        return getLocalRepositories(descriptor.getKey());
+                    });
+        } else {
+            return Stream.of(repoKeyPrefix);
+        }
+    }
+
+    private boolean isVirtualRepo(final String repo) {
+        if (repo == null) {
+            return false;
+        }
+        return repositoryService.isVirtualRepoExist(repo);
     }
 }

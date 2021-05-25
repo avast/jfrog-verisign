@@ -1,23 +1,14 @@
 package com.server.avast.verisign.config.properties;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 /**
  * @author Vitasek L.
  */
 public class VerificationProperties {
     private int errorHttpResponseCode = 400;
     private String additionalErrorMessage;
-    private boolean enableJarVerification = true;
-    private boolean enableRpmVerification = true;
-    private boolean caseSensitive = true;
-
-    private String rpmCommand = "rpm -Kv";
-    private List<String> ignorePath = Collections.emptyList();
-    private List<String> enabledPath = Collections.emptyList();
-    private List<String> verifyJarExtensions = Arrays.asList("jar", "aar");
+    private VerifyJarProperties jar = new VerifyJarProperties();
+    private VerifyRpmProperties rpm = new VerifyRpmProperties();
+    private PathProperties paths = new PathProperties();
 
     public String getAdditionalErrorMessage() {
         return additionalErrorMessage;
@@ -25,14 +16,6 @@ public class VerificationProperties {
 
     public void setAdditionalErrorMessage(String additionalErrorMessage) {
         this.additionalErrorMessage = additionalErrorMessage;
-    }
-
-    public List<String> getIgnorePath() {
-        return ignorePath;
-    }
-
-    public void setIgnorePath(List<String> ignorePath) {
-        this.ignorePath = ignorePath;
     }
 
     public int getErrorHttpResponseCode() {
@@ -43,51 +26,28 @@ public class VerificationProperties {
         this.errorHttpResponseCode = errorHttpResponseCode;
     }
 
-    public List<String> getVerifyJarExtensions() {
-        return verifyJarExtensions;
+
+    public VerifyJarProperties getJar() {
+        return jar;
     }
 
-    public void setVerifyJarExtensions(List<String> verifyJarExtensions) {
-        this.verifyJarExtensions = verifyJarExtensions;
+    public void setJar(VerifyJarProperties jar) {
+        this.jar = jar;
     }
 
-    public List<String> getEnabledPath() {
-        return enabledPath;
+    public VerifyRpmProperties getRpm() {
+        return rpm;
     }
 
-    public void setEnabledPath(List<String> enabledPath) {
-        this.enabledPath = enabledPath;
+    public void setRpm(VerifyRpmProperties rpm) {
+        this.rpm = rpm;
     }
 
-    public String getRpmCommand() {
-        return rpmCommand;
+    public PathProperties getPaths() {
+        return paths;
     }
 
-    public void setRpmCommand(String rpmCommand) {
-        this.rpmCommand = rpmCommand;
-    }
-
-    public boolean isEnableJarVerification() {
-        return enableJarVerification;
-    }
-
-    public void setEnableJarVerification(boolean enableJarVerification) {
-        this.enableJarVerification = enableJarVerification;
-    }
-
-    public boolean isEnableRpmVerification() {
-        return enableRpmVerification;
-    }
-
-    public void setEnableRpmVerification(boolean enableRpmVerification) {
-        this.enableRpmVerification = enableRpmVerification;
-    }
-
-    public boolean isCaseSensitive() {
-        return caseSensitive;
-    }
-
-    public void setCaseSensitive(boolean caseSensitive) {
-        this.caseSensitive = caseSensitive;
+    public void setPaths(PathProperties paths) {
+        this.paths = paths;
     }
 }

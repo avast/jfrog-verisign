@@ -530,8 +530,8 @@ public class Main {
         storetype = KeyStore.getDefaultType();
         storetype = KeyStoreUtil.niceStoreTypeName(storetype);
         ckaliases.add(keystoreProperties.getAlias());
-        keystore = keystoreProperties.getKeystorePath();
-        storepass = keystoreProperties.getKeystorePass().toCharArray();
+        keystore = keystoreProperties.getPath();
+        storepass = keystoreProperties.getPassword().toCharArray();
         try {
             loadKeyStore(keystore, false);
         } catch (Exception e) {

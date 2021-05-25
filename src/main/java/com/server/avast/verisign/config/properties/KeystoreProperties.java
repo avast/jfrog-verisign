@@ -7,33 +7,33 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class KeystoreProperties {
-    private String keystorePath;
-    private String keystorePass = "";
+    private String path;
+    private String password = "";
     private String alias;
 
     public KeystoreProperties() {
     }
 
-    public KeystoreProperties(String keystorePath, String keystorePass, String alias) {
-        this.keystorePath = keystorePath;
-        this.keystorePass = keystorePass;
+    public KeystoreProperties(String path, String password, String alias) {
+        this.path = path;
+        this.password = password;
         this.alias = alias;
     }
 
-    public String getKeystorePath() {
-        return keystorePath;
+    public String getPath() {
+        return path;
     }
 
-    public void setKeystorePath(String keystorePath) {
-        this.keystorePath = keystorePath;
+    public void setPath(String path) {
+        this.path = path;
     }
 
-    public String getKeystorePass() {
-        return keystorePass;
+    public String getPassword() {
+        return password;
     }
 
-    public void setKeystorePass(String keystorePass) {
-        this.keystorePass = keystorePass;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getAlias() {

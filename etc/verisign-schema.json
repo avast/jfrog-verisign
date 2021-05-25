@@ -4,33 +4,9 @@
   "title": "Verisign schema",
   "type": "object",
   "properties": {
-    "keystore": {
-      "type": "object",
-      "properties": {
-        "keystorePath": {
-          "description": "Path to keystore PKCS12 file.",
-          "type": "string",
-          "default": ""
-        },
-        "keystorePass": {
-          "description": "Path to keystore password. It cannot be null",
-          "type": "string",
-          "default": ""
-        },
-        "alias": {
-          "description": "Key alias(friendly name) in the keystore file",
-          "type": "string",
-          "default": ""
-        }
-      },
-      "required": [
-        "keystorePath",
-        "keystorePass",
-        "alias"
-      ]
-    },
     "verification": {
       "type": "object",
+      "additionalProperties": false,
       "properties": {
         "errorHttpResponseCode": {
           "type": "integer",
@@ -38,53 +14,118 @@
           "maximum": 600,
           "description": "http response code for error code"
         },
-        "enableJarVerification": {
-          "type": "boolean",
-          "description": "True if plugin feature should be enabled",
-          "default": true
-        },
-        "enableRpmVerification": {
-          "type": "boolean",
-          "description": "True if plugin feature should be enabled",
-          "default": true
-        },
-        "caseSensitive": {
-          "type": "boolean",
-          "description": "Whether the paths should be considered in case-sensitive manner",
-          "default": true
-        },
         "additionalErrorMessage": {
           "type": "string",
           "description": "Message which is added to the error response to help user resolve problem",
           "default": ""
         },
-        "verifyJarExtensions": {
-          "type": "array",
-          "description": "for which extensions should be used JAR verification",
-          "items": [
-            {
-              "type": "string"
+        "paths": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "caseSensitive": {
+              "type": "boolean",
+              "description": "Whether the paths should be considered in case-sensitive manner",
+              "default": true
+            },
+            "expandVirtualReposToLocal": {
+              "type": "boolean",
+              "description": "Paths with prefixed with virtual repos are expanded into local repos - eg. maven-local-virtual/.... is expanded to maven-local-x1/,maven-local-x2/,..",
+              "default": true
+            },
+            "enabledPath": {
+              "type": "array",
+              "description": "enable verification only for these Ant paths only, apply for all if empty/not defined. Verification is applied only for both enabled & not ignored paths. Ant path matching, see https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/util/AntPathMatcher.html",
+              "items": [
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "ignorePath": {
+              "description": "These paths are being ignored from verification. Ant path matching, see https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/util/AntPathMatcher.html",
+              "type": "array",
+              "items": [
+                {
+                  "type": "string"
+                }
+              ]
             }
-          ]
+          }
         },
-        "enabledPath": {
-          "type": "array",
-          "description": "enable verification only for these Ant paths only, apply for all if empty/not defined. Verification is applied only for both enabled & not ignored paths. Ant path matching, see https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/util/AntPathMatcher.html",
-          "items": [
-            {
-              "type": "string"
+        "jar": {
+          "type": "object",
+          "description": "JAR verification related properties",
+          "additionalProperties": false,
+          "required": [
+            "keystore", "extensions"
+          ],
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "True if plugin feature should be enabled",
+              "default": true
+            },
+            "extensions": {
+              "type": "array",
+              "description": "for which extensions should be used JAR verification",
+              "items": [
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "keystore": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "description": "Path to keystore PKCS12 file.",
+                  "type": "string",
+                  "default": ""
+                },
+                "password": {
+                  "description": "Path to keystore password. It cannot be null",
+                  "type": "string",
+                  "default": ""
+                },
+                "alias": {
+                  "description": "Key alias(friendly name) in the keystore file",
+                  "type": "string",
+                  "default": ""
+                }
+              },
+              "required": [
+                "path",
+                "password",
+                "alias"
+              ],
+              "additionalProperties": false
             }
-          ]
+          }
         },
-        "ignorePath": {
-          "description": "These paths are being ignored from verification. Ant path matching, see https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/util/AntPathMatcher.html",
-          "type": "array",
-          "items": [
-            {
+        "rpm": {
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "True if plugin feature should be enabled",
+              "default": true
+            },
+            "rpmCommand": {
               "type": "string"
+            },
+            "pgpKeyIds": {
+              "description": "list of PGP key ids for which should be given rpm file valid",
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minLength": 1
             }
-          ]
-        }
+          },
+          "required": ["pgpKeyIds"],
+          "additionalProperties": false
+        },
+        "additionalProperties": false
       }
     }
   },

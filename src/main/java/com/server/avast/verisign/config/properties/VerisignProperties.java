@@ -7,7 +7,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class VerisignProperties {
-    private KeystoreProperties keystore;
     private VerificationProperties verification;
 
     public VerificationProperties getVerification() {
@@ -16,13 +15,5 @@ public class VerisignProperties {
 
     public void setVerification(VerificationProperties verification) {
         this.verification = verification;
-    }
-
-    public KeystoreProperties getKeystore() {
-        return keystore;
-    }
-
-    public void setKeystore(KeystoreProperties keystore) {
-        this.keystore = keystore;
     }
 }
