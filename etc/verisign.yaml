@@ -5,7 +5,7 @@ verification:
   nonBlockingMode: true
   #  Message which is added to the error response to help user resolve problem
   additionalErrorMessage: |
-    Go to https://xxx.avast.com/avast/signing for more help.
+    Go to https://cml.avast.com/display/CDS/Signing+JAVA+binaries+in+IDA+environment for more help.
   rpm:
     # rpm validation enabled
     enabled: true
@@ -35,8 +35,8 @@ verification:
 
     # enable verification only for these Ant paths only, apply for all if empty/not defined
     # verification is applied only for both enabled & not ignored paths
-    enabledPath:
-      - 'maven-local/com/avast/android/**'
+#    enabledPath:
+#      - 'maven-local/com/avast/android/**'
 
     # Ant path matching, see https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/util/AntPathMatcher.html
     ignorePath:
