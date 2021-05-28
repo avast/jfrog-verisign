@@ -19,6 +19,11 @@
           "description": "Message which is added to the error response to help user resolve problem",
           "default": ""
         },
+        "nonBlockingMode": {
+          "type": "boolean",
+          "description": "When true the verification does not block/stop a deployment, false otherwise",
+          "default": "false"
+        },
         "paths": {
           "type": "object",
           "additionalProperties": false,
@@ -88,16 +93,20 @@
                   "type": "string",
                   "default": ""
                 },
-                "alias": {
+                "aliases": {
                   "description": "Key alias(friendly name) in the keystore file",
-                  "type": "string",
-                  "default": ""
+                  "type": "array",
+                  "items": [
+                    {
+                      "type": "string"
+                    }
+                  ]
                 }
               },
               "required": [
                 "path",
                 "password",
-                "alias"
+                "aliases"
               ],
               "additionalProperties": false
             }

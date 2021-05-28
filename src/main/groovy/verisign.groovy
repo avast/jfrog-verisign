@@ -2,6 +2,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.server.avast.verisign.config.Config
 import com.server.avast.verisign.service.VerificationService
 import groovy.transform.Field
+import org.artifactory.exception.CancelException
 import org.artifactory.fs.ItemInfo
 
 @Field final String PROPERTIES_FILE_PATH = "plugins/verisign.yaml"
@@ -31,6 +32,7 @@ executions {
         def verification = config.getProperties().getVerification()
         map.put("enabledPath", verification.getEnabledPath())
         map.put("ignorePath", verification.getIgnorePath())
+        map.put("nonBlockingMode", verification.isNonBlockingMode())
         message = new ObjectMapper().writeValueAsString(map)
         status = 200
     }
@@ -40,7 +42,18 @@ storage {
     afterCreate { ItemInfo item ->
         if (!item.isFolder()) {
             asSystem {
-                verificationSupport.verify(item)
+                try {
+                    verificationSupport.verify(item)
+                } catch (CancelException e) {
+                    if (!config.getProperties().getVerification().isNonBlockingMode()) {
+                        throw e
+                    }
+                } catch (Exception e) {
+                    log.error("Failed to verify item", e)
+                    if (!config.getProperties().getVerification().isNonBlockingMode()) {
+                        throw e
+                    }
+                }
             }
         }
     }

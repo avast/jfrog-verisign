@@ -1,7 +1,8 @@
 verification:
   # http response code
   errorHttpResponseCode: 400
-
+  # When true the verification does not block/stop a deployment, false otherwise, default false
+  nonBlockingMode: true
   #  Message which is added to the error response to help user resolve problem
   additionalErrorMessage: |
     Go to https://xxx.avast.com/avast/signing for more help.
@@ -19,7 +20,8 @@ verification:
     keystore:
       path: 'c:\temp\signcert.p12'
       password: ''
-      alias: 'avast-sign'
+      aliases:
+        - 'avast-sign'
     extensions:
       - jar
       - aar

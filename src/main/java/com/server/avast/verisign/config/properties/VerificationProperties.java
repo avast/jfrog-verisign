@@ -6,6 +6,7 @@ package com.server.avast.verisign.config.properties;
 public class VerificationProperties {
     private int errorHttpResponseCode = 400;
     private String additionalErrorMessage;
+    private boolean nonBlockingMode = false;
     private VerifyJarProperties jar = new VerifyJarProperties();
     private VerifyRpmProperties rpm = new VerifyRpmProperties();
     private PathProperties paths = new PathProperties();
@@ -49,5 +50,13 @@ public class VerificationProperties {
 
     public void setPaths(PathProperties paths) {
         this.paths = paths;
+    }
+
+    public boolean isNonBlockingMode() {
+        return nonBlockingMode;
+    }
+
+    public void setNonBlockingMode(boolean nonBlockingMode) {
+        this.nonBlockingMode = nonBlockingMode;
     }
 }

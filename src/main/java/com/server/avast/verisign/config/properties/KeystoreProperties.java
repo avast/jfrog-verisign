@@ -2,6 +2,9 @@ package com.server.avast.verisign.config.properties;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
  * @author Vitasek L.
  */
@@ -9,15 +12,14 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class KeystoreProperties {
     private String path;
     private String password = "";
-    private String alias;
+    private List<String> aliases = Collections.emptyList();
 
     public KeystoreProperties() {
     }
 
-    public KeystoreProperties(String path, String password, String alias) {
+    public KeystoreProperties(String path, String password, List<String> aliases) {
         this.path = path;
         this.password = password;
-        this.alias = alias;
     }
 
     public String getPath() {
@@ -36,12 +38,11 @@ public class KeystoreProperties {
         this.password = password;
     }
 
-    public String getAlias() {
-        return alias;
+    public List<String> getAliases() {
+        return aliases;
     }
 
-    public void setAlias(String alias) {
-        this.alias = alias;
+    public void setAliases(List<String> aliases) {
+        this.aliases = aliases;
     }
-
 }

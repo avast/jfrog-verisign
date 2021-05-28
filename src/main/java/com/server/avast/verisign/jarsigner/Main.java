@@ -529,7 +529,7 @@ public class Main {
     public void init(KeystoreProperties keystoreProperties) {
         storetype = KeyStore.getDefaultType();
         storetype = KeyStoreUtil.niceStoreTypeName(storetype);
-        ckaliases.add(keystoreProperties.getAlias());
+        ckaliases.addAll(keystoreProperties.getAliases());
         keystore = keystoreProperties.getPath();
         storepass = keystoreProperties.getPassword().toCharArray();
         try {
