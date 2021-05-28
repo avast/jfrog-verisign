@@ -5,7 +5,6 @@ verification:
   #  Message which is added to the error response to help user resolve problem
   additionalErrorMessage: |
     Go to https://xxx.avast.com/avast/signing for more help.
-
   rpm:
     pgpKeyIds:
       - "ca59abcd"

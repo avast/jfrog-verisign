@@ -1,6 +1,7 @@
 package com.server.avast.verisign.utils;
 
 import com.server.avast.verisign.config.Config;
+import com.server.avast.verisign.config.VerisignPropertiesProvider;
 import com.server.avast.verisign.jarsigner.VerifyResult;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -8,6 +9,7 @@ import org.artifactory.resource.ResourceStreamHandle;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,9 +26,9 @@ import java.util.concurrent.TimeUnit;
 public class RpmVerifier {
 
     private static final Logger logger = LoggerFactory.getLogger(RpmVerifier.class);
-    private final Config config;
+    private final VerisignPropertiesProvider config;
 
-    public RpmVerifier(Config config) {
+    public RpmVerifier(VerisignPropertiesProvider config) {
         this.config = config;
     }
 
@@ -106,6 +108,9 @@ public class RpmVerifier {
             } else {
                 // result code is 0 - ALL OK
                 final List<String> pgpKeyIds = config.getProperties().getVerification().getRpm().getPgpKeyIds();
+                if (CollectionUtils.isEmpty(pgpKeyIds)) {
+                    throw new RuntimeException("RPM verification pgpKeys is not defined");
+                }
                 final boolean isSigned = response.stream().skip(1).filter(line -> {
                     final String lineUpperCase = line.toUpperCase(Locale.ENGLISH);
                     return pgpKeyIds.stream().anyMatch(key -> lineUpperCase.contains(("Signature, key ID " + key + ": OK").toUpperCase(Locale.ENGLISH)));
@@ -114,7 +119,7 @@ public class RpmVerifier {
                     verifyResult.getInfo().addAll(response);
                 } else {
                     final List<String> errors = verifyResult.getErrors();
-                    errors.add("RPM file is not signed by given keys " + String.join(",", pgpKeyIds));
+                    errors.add("RPM file is not signed one of the given keys [" + String.join(",", pgpKeyIds) + "]");
                     errors.addAll(response);
                 }
             }

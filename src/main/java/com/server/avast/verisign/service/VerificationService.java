@@ -1,6 +1,6 @@
 package com.server.avast.verisign.service;
 
-import com.server.avast.verisign.config.Config;
+import com.server.avast.verisign.config.VerisignPropertiesProvider;
 import com.server.avast.verisign.config.properties.KeystoreProperties;
 import com.server.avast.verisign.config.properties.PathProperties;
 import com.server.avast.verisign.config.properties.VerificationProperties;
@@ -10,6 +10,8 @@ import com.server.avast.verisign.utils.RpmVerifier;
 import org.apache.commons.lang.StringUtils;
 import org.artifactory.api.context.ArtifactoryContext;
 import org.artifactory.api.repo.RepositoryService;
+import org.artifactory.descriptor.repo.LocalRepoDescriptor;
+import org.artifactory.descriptor.repo.VirtualRepoDescriptor;
 import org.artifactory.exception.CancelException;
 import org.artifactory.fs.ItemInfo;
 import org.artifactory.repo.RepoPath;
@@ -31,14 +33,15 @@ import java.util.stream.Stream;
  */
 public class VerificationService {
     private static final Logger logger = LoggerFactory.getLogger(VerificationService.class);
-    private final Config config;
+    private final VerisignPropertiesProvider config;
     private final Repositories repositories;
     private final File dataDir;
     private final AntPathMatcher antPathMatcher;
     private final RpmVerifier rpmVerifier;
     private final RepositoryService repositoryService;
 
-    public VerificationService(Config config, Repositories repositories, ArtifactoryContext artifactoryContext) {
+    public VerificationService(VerisignPropertiesProvider config, Repositories repositories,
+                               ArtifactoryContext artifactoryContext) {
         this.config = config;
         this.repositories = repositories;
         dataDir = artifactoryContext.getArtifactoryHome().getDataDir();
@@ -126,7 +129,7 @@ public class VerificationService {
         }
     }
 
-    private void verifyJar(RepoPath repoPath, String path) {
+    void verifyJar(RepoPath repoPath, String path) {
         logger.info("Going to verify JAR repopath {}", path);
 
         try {
@@ -164,7 +167,13 @@ public class VerificationService {
         if (config.getProperties().getVerification().getPaths().isExpandVirtualReposToLocal()) {
             return antPaths.stream().flatMap(antPath -> {
                 final String repoKeyPrefix = StringUtils.substringBefore(antPath, "/");
-                return getLocalRepositories(repoKeyPrefix).distinct().map(localRepo -> StringUtils.replaceOnce(antPath, repoKeyPrefix, localRepo));
+                return getLocalRepositories(repoKeyPrefix).distinct().map(localRepo -> {
+                    if (localRepo.equals(repoKeyPrefix)) {
+                        return antPath;
+                    } else {
+                        return StringUtils.replaceOnce(antPath, repoKeyPrefix, localRepo);
+                    }
+                });
             });
         }
         return antPaths.stream();
@@ -172,13 +181,9 @@ public class VerificationService {
 
     private Stream<String> getLocalRepositories(final String repoKeyPrefix) {
         if (isVirtualRepo(repoKeyPrefix)) {
-            return repositoryService.virtualRepoDescriptorByKey(repoKeyPrefix).getRepositories().stream().
-                    flatMap(descriptor -> {
-                        if (descriptor.isReal()) {
-                            return Stream.of(descriptor.getKey());
-                        }
-                        return getLocalRepositories(descriptor.getKey());
-                    });
+            final VirtualRepoDescriptor virtualRepoDescriptor = repositoryService.virtualRepoDescriptorByKey(repoKeyPrefix);
+            final LocalRepoDescriptor defaultDeploymentRepo = virtualRepoDescriptor.getDefaultDeploymentRepo();
+            return Stream.of(defaultDeploymentRepo.getKey());
         } else {
             return Stream.of(repoKeyPrefix);
         }
@@ -190,4 +195,6 @@ public class VerificationService {
         }
         return repositoryService.isVirtualRepoExist(repo);
     }
+
+
 }

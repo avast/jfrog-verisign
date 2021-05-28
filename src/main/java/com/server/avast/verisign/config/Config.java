@@ -14,7 +14,7 @@ import java.io.IOException;
  * @author Vitasek L.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Config {
+public class Config implements VerisignPropertiesProvider {
     private static final Logger logger = LoggerFactory.getLogger(Config.class);
     private final ObjectMapper mapper;
     private final File propertyPath;
@@ -40,6 +40,7 @@ public class Config {
         }
     }
 
+    @Override
     public VerisignProperties getProperties() {
         synchronized (lock) {
             if (properties == null) {

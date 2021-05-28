@@ -1,12 +1,13 @@
 # jfrog-verisign
 
-- JFrog plugin to verify deploying artifacts signatures. It supports both JAR verification and RPM (PGP verification). 
+- JFrog plugin to verify deploying artifacts signatures. It supports both JAR and RPM (PGP) verification. 
 
 ## Project info
-- **Project maintainer:** Ladislav Vitásek ([vitasek@avast.com](mailto:vitasek@avast.com))
+- **Project maintainer:** Ladislav Vitásek ([vitasek@avast.com](mailto:vitasek/@/avast.com))
 - **Requirements:**
     * Gradle 6.6+
     * JDK 11
+    * JFrog 7+
 
 It was tested with JFrog API version `artifactory-api:7.12.5`.  
 
@@ -64,7 +65,7 @@ For the steps 1-3 you can use `./gradlew deploy` task, which makes these steps 1
 2. Copy `verisign.groovy` (located in `/src/main/groovy`) into JFrog's `var/etc/artifactory/plugins`  directory
 3. Copy `verisign.yaml` (located in `/etc/verisign.yaml`) into JFrog's `var/etc/artifactory/plugins`  directory
 4. Define keystore file (for the JAR verification) and public PGP keys (for RPM verification, eg. use command `sudo rpm --import re.rpm.gpg.public`) on the JFrog's machines
-   Make sure the keystore file is accessible for JFrog system user (put it into eg. user home).
+   Make sure the keystore file is accessible for JFrog system user (put it into its eg. user home).
 5. Update `verisign.yaml` according to your needs
 6. Update `logback.xml` configuration (located at JFrog's `/var/etc/artifactory/logback.xml`) with custom log levels
    ```xml
@@ -86,7 +87,7 @@ You can refresh this configuration file using [API call](#configuration-file-rel
 
 ## API Calls
 ### Configuration file reload
-To **reload** verisign.yaml you can simply call this `curl` command
+To force **reload** verisign.yaml you can simply call this `curl` command
 ```
 curl -X GET -v -u admin:password "http://localhost:8082/artifactory/api/plugins/execute/refreshVerisignConfig"
 ```
@@ -96,5 +97,5 @@ To **get current ignore/enabled repo paths** from verisign.yaml as JSON call:
 curl -X GET -v -u admin:password "http://localhost:8082/artifactory/api/plugins/execute/verisignConfig"
 ```
 
-> ⚠ Note: The used user should be an `admin` or the user should be part of the `verisign` group (must exist/be created in JFrog). These pre-defined settings can be changed in the `verisign.groovy` file. 
+> ⚠ Note: The used user for connection should be an `admin` or the user should be part of the `verisign` group (must exist/be created in JFrog). These pre-defined settings can be changed in the `verisign.groovy` file. 
 
