@@ -6,11 +6,16 @@ verification:
   additionalErrorMessage: |
     Go to https://xxx.avast.com/avast/signing for more help.
   rpm:
+    # rpm validation enabled
+    enabled: true
     pgpKeyIds:
       - "ca59abcd"
   # for which extensions should be used JAR verification
   jar:
 # config file for verisign properties - example and for dev purposes
+    # jar validation enabled
+    enabled: true
+    # keystore settings
     keystore:
       path: 'c:\temp\signcert.p12'
       password: ''
@@ -23,6 +28,7 @@ verification:
     # paths with prefixed with virtual repos are expanded into local repos - eg. maven-local-virtual/.... is expanded to maven-local-x1/,maven-local-x2/,..
     expandVirtualReposToLocal: true
 
+    # Whether the paths should be considered in case-sensitive manner jfrog-verisign
     caseSensitive: false
 
     # enable verification only for these Ant paths only, apply for all if empty/not defined
