@@ -65,10 +65,15 @@ public class VerificationService {
     }
 
     private void verifyPath(RepoPath repoPath) {
+        final VerificationProperties verification = config.getProperties().getVerification();
+        if (!verification.getJar().isEnabled() && !verification.getRpm().isEnabled()) {
+            logger.trace("Verification is disabled");
+            return;
+        }
+
         final String path = repoPath.toPath();
         logger.debug("Verify file path: {}", path);
 
-        final VerificationProperties verification = config.getProperties().getVerification();
         final PathProperties paths = verification.getPaths();
 
         antPathMatcher.setCaseSensitive(paths.isCaseSensitive());
@@ -96,14 +101,17 @@ public class VerificationService {
                 verifyJar(repoPath, path);
             }
         } else {
-            if (verification.getRpm().isEnabled()) {
-                if (endsWithCaseSensitive(paths.isCaseSensitive(), path, ".rpm")) {
-                    verifyRpm(repoPath, path);
-                }
-            } else {
-                logger.debug("Rpm verification is disabled");
-            }
+            logger.trace("Rpm verification is disabled");
         }
+
+        if (verification.getRpm().isEnabled()) {
+            if (endsWithCaseSensitive(paths.isCaseSensitive(), path, ".rpm")) {
+                verifyRpm(repoPath, path);
+            }
+        } else {
+            logger.trace("Rpm verification is disabled");
+        }
+
     }
 
     private void verifyRpm(RepoPath repoPath, String path) {
@@ -125,7 +133,7 @@ public class VerificationService {
             }
         } catch (IOException e) {
             logger.error("Failed to verify RPM file {}", path, e);
-            throw new CancelException("Failed to verify " + path + " " + e.getMessage(), 503);
+            throw new CancelException("Failed to verify " + path + " " + e.getMessage(), e, 503);
         }
     }
 
@@ -151,7 +159,7 @@ public class VerificationService {
             }
         } catch (IOException e) {
             logger.error("Failed to verify JAR file {}", path, e);
-            throw new CancelException("Failed to verify " + path + " " + e.getMessage(), 503);
+            throw new CancelException("Failed to verify " + path + " " + e.getMessage(), e, 503);
         }
     }
 
@@ -195,6 +203,4 @@ public class VerificationService {
         }
         return repositoryService.isVirtualRepoExist(repo);
     }
-
-
 }

@@ -3,6 +3,7 @@ package com.server.avast.verisign.utils;
 import org.junit.Test;
 import org.springframework.util.AntPathMatcher;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -18,7 +19,7 @@ public class MatcherTest {
         assertTrue(match);
 
         final boolean match2 = matcher.match(pattern, "com/avast/google/ff_hdfs-shell-6.6.51-1.prod.noarch.rpm");
-        assertTrue(match2);
+        assertFalse(match2);
     }
 
 }

@@ -16,7 +16,7 @@ executions {
             config.reload()
             message = """{result: "DONE"}"""
             status = 200
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.error("Failed to reload Verisign plugin config from path ${PROPERTIES_FILE_PATH}", e)
             final Map<String, Object> map = new HashMap<>()
             map.put("result", "FAILED")
@@ -47,8 +47,10 @@ storage {
                 } catch (CancelException e) {
                     if (!config.getProperties().getVerification().isNonBlockingMode()) {
                         throw e
+                    } else {
+                        log.error(e.getMessage())
                     }
-                } catch (Exception e) {
+                } catch (Throwable e) {
                     log.error("Failed to verify item", e)
                     if (!config.getProperties().getVerification().isNonBlockingMode()) {
                         throw e

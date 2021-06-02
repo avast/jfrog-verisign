@@ -22,6 +22,7 @@ verification:
       password: ''
       aliases:
         - 'avast-sign'
+    # for which extensions should be used JAR verification jfrog-verisign
     extensions:
       - jar
       - aar
