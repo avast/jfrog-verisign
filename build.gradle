@@ -26,6 +26,7 @@ java {
 
 jar {
     exclude("verisign*")
+    //we create jar file without version suffix, it's easier to overwrite older lib file (otherwise force.delete has to be used)
     archiveVersion.set("")
 }
 

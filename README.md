@@ -1,11 +1,11 @@
-# jfrog-verisign
+# jfrog-verisign – JAR & RPM  signature verification 
 
 - JFrog plugin to verify deploying artifacts signatures. It supports both JAR and RPM (PGP) verification. 
 
 ## Project info
 - **Project maintainer:** Ladislav Vitásek ([vitasek@avast.com](mailto:vitasek/@/avast.com))
 - **Requirements:**
-    * Gradle 6.6+
+    * Gradle 6.8+
     * JDK 11
     * JFrog 7+
 
@@ -78,6 +78,19 @@ For the steps 1-3 you can use `./gradlew deploy` task, which makes these steps 1
    ```
 7. Restart JFrog
 
+#### Checking plugin proper configuration
+`Curl` command to execute a deployment of [not_signed.jar](src/test/resources/signed-jar/not_signed.jar) should produce this error:
+```bash
+curl -u user:password -X PUT "http://localhost:8081/artifactory/maven-local/my/new/artifact/directory/not_signed.jar" -T not_signed.jar
+{
+  "errors" : [ {
+    "status" : 400,
+    "message" : "org.artifactory.exception.CancelException: Failed to verify JAR artifact: maven-local/my/new/artifact/directory/not_signed.jar . Error(s): jar is unsigned.\n\nGo to https://xyz for more help.\n"
+  } ]
+}
+```
+
+Alternatively you can try to use JFrog's UI to deploy artifact. 
 
 ## Verisign.yaml file
 See this [example plugin configuration](/etc/verisign.yaml) file.  

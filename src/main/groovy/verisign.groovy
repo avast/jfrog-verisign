@@ -1,5 +1,6 @@
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.server.avast.verisign.config.Config
+import com.server.avast.verisign.config.properties.VerificationProperties
 import com.server.avast.verisign.service.VerificationService
 import groovy.transform.Field
 import org.artifactory.exception.CancelException
@@ -29,7 +30,7 @@ executions {
     verisignConfig(version: '1.0', httpMethod: 'GET', users:["admin"],  groups:["verisign"]) {  params ->
         final Map<String, Object> map = new HashMap<>()
 
-        def verification = config.getProperties().getVerification()
+        VerificationProperties verification = config.getProperties().getVerification()
         map.put("enabledPath", verification.getEnabledPath())
         map.put("ignorePath", verification.getIgnorePath())
         map.put("nonBlockingMode", verification.isNonBlockingMode())
