@@ -3,7 +3,7 @@
 - JFrog plugin to verify deploying artifacts signatures. It supports both JAR and RPM (PGP) verification. 
 
 ## Project info
-- **Project maintainer:** Ladislav Vitásek ([vitasek@avast.com](mailto:vitasek/@/avast.com))
+- **Project maintainer:** Ladislav Vitásek ([vitasek/@/avast.com](mailto:vitasek/@/avast.com))
 - **Requirements:**
     * Gradle 6.8+
     * JDK 11
