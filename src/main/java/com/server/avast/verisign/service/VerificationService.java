@@ -72,7 +72,7 @@ public class VerificationService {
         }
 
         final String path = repoPath.toPath();
-        logger.debug("Verify file path: {}", path);
+        logger.trace("Verify file path: {}", path);
 
         final PathProperties paths = verification.getPaths();
 
@@ -83,7 +83,7 @@ public class VerificationService {
                         anyMatch(pattern -> antPathMatcher.match(pattern, path));
 
         if (!enabledPath) {
-            logger.debug("Verification is not enabled for this repo path {}", path);
+            logger.trace("Verification is not enabled for this repo path {}", path);
             return;
         }
 
@@ -115,6 +115,7 @@ public class VerificationService {
     }
 
     private void verifyRpm(RepoPath repoPath, String path) {
+        logger.debug("Going to verify RPM repopath {}", path);
         try {
             final File file = getPhysicalPath(repoPath);
             final VerifyResult result = file.exists() ?
@@ -138,7 +139,7 @@ public class VerificationService {
     }
 
     void verifyJar(RepoPath repoPath, String path) {
-        logger.info("Going to verify JAR repopath {}", path);
+        logger.debug("Going to verify JAR repopath {}", path);
 
         try {
             final KeystoreProperties keystore = config.getProperties().getVerification().getJar().getKeystore();
