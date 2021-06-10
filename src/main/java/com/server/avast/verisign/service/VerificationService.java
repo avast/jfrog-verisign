@@ -101,7 +101,7 @@ public class VerificationService {
                 verifyJar(repoPath, path);
             }
         } else {
-            logger.trace("Rpm verification is disabled");
+            logger.trace("Jar verification is disabled");
         }
 
         if (verification.getRpm().isEnabled()) {
