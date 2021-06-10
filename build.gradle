@@ -1,0 +1,103 @@
+buildscript {
+
+    repositories {
+        jcenter()
+        mavenCentral()
+    }
+}
+
+plugins {
+    id 'com.coditory.manifest' version '0.1.14'
+}
+
+apply plugin: 'idea'
+apply plugin: 'java'
+apply plugin: 'groovy'
+apply plugin: 'application'
+
+group = 'com.avast.server'
+version = '1.0.0'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+    mainClassName = "com.server.avast.verisign.utils.RpmVerifier"
+}
+
+jar {
+    exclude("verisign*")
+    //we create jar file without version suffix, it's easier to overwrite older lib file (otherwise force.delete has to be used)
+    archiveVersion.set("")
+}
+
+compileJava {
+    options.compilerArgs.addAll([
+            "--add-exports",
+            "java.base/sun.security.timestamp=ALL-UNNAMED"
+    ])
+    options.compilerArgs.addAll([
+            "--add-exports",
+            "java.base/sun.security.pkcs=ALL-UNNAMED"
+    ])
+    options.compilerArgs.addAll([
+            "--add-exports",
+            "java.base/sun.security.tools=ALL-UNNAMED"
+    ])
+    options.compilerArgs.addAll([
+            "--add-exports",
+            "java.base/sun.security.validator=ALL-UNNAMED"
+    ])
+    options.compilerArgs.addAll([
+            "--add-exports",
+            "java.base/sun.security.x509=ALL-UNNAMED"
+    ])
+    options.compilerArgs.addAll([
+            "--add-exports",
+            "java.base/sun.security.util=ALL-UNNAMED"
+    ])
+    options.compilerArgs.addAll([
+            "--add-exports",
+            "jdk.jartool/sun.security.tools.jarsigner=ALL-UNNAMED"
+    ])
+}
+
+def libsToCopy = copySpec {
+    from "build/libs"
+    include "*.jar"
+}
+
+def groovyToCopy = copySpec {
+    from "src/main/groovy"
+    include "*.groovy"
+}
+
+def propertiesToCopy = copySpec {
+    from "etc"
+    include "*.yaml"
+}
+
+
+task deploy (dependsOn: build, type: Copy) {
+    into findProperty("artifactoryPath")
+    into('plugins/lib') {
+        with libsToCopy
+    }
+    into('plugins') {
+        with groovyToCopy
+    }
+    into('plugins') {
+        with propertiesToCopy
+    }
+}
+
+repositories {
+    jcenter()
+    mavenCentral()
+}
+
+
+dependencies {
+    implementation 'org.artifactory:artifactory-api:7.12.5'
+    implementation 'org.spockframework:spock-core:1.1-groovy-2.4'
+    implementation 'org.jfrog.artifactory.client:artifactory-java-client-services:2.5.1'
+}

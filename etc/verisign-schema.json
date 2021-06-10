@@ -1,0 +1,143 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://xyzid.avast.com/object1619081476.json",
+  "title": "Verisign schema",
+  "type": "object",
+  "properties": {
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "errorHttpResponseCode": {
+          "type": "integer",
+          "minimum": 200,
+          "maximum": 600,
+          "description": "http response code for error code"
+        },
+        "additionalErrorMessage": {
+          "type": "string",
+          "description": "Message which is added to the error response to help user resolve problem",
+          "default": ""
+        },
+        "nonBlockingMode": {
+          "type": "boolean",
+          "description": "When true the verification does not block/stop a deployment, false otherwise",
+          "default": "false"
+        },
+        "paths": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "caseSensitive": {
+              "type": "boolean",
+              "description": "Whether the paths should be considered in case-sensitive manner",
+              "default": true
+            },
+            "expandVirtualReposToLocal": {
+              "type": "boolean",
+              "description": "Paths with prefixed with virtual repos are expanded into local repos - eg. maven-local-virtual/.... is expanded to maven-local-x1/,maven-local-x2/,..",
+              "default": true
+            },
+            "enabledPath": {
+              "type": "array",
+              "description": "enable verification only for these Ant paths only, apply for all if empty/not defined. Verification is applied only for both enabled & not ignored paths. Ant path matching, see https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/util/AntPathMatcher.html",
+              "items": [
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "ignorePath": {
+              "description": "These paths are being ignored from verification. Ant path matching, see https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/util/AntPathMatcher.html",
+              "type": "array",
+              "items": [
+                {
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        "jar": {
+          "type": "object",
+          "description": "JAR verification related properties",
+          "additionalProperties": false,
+          "required": [
+            "keystore", "extensions"
+          ],
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "True if plugin feature should be enabled",
+              "default": true
+            },
+            "extensions": {
+              "type": "array",
+              "description": "for which extensions should be used JAR verification",
+              "items": [
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "keystore": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "description": "Path to keystore PKCS12 file.",
+                  "type": "string",
+                  "default": ""
+                },
+                "password": {
+                  "description": "Path to keystore password. It cannot be null",
+                  "type": "string",
+                  "default": ""
+                },
+                "aliases": {
+                  "description": "Key alias(friendly name) in the keystore file",
+                  "type": "array",
+                  "items": [
+                    {
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "path",
+                "password",
+                "aliases"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "rpm": {
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "True if plugin feature should be enabled",
+              "default": true
+            },
+            "rpmCommand": {
+              "type": "string"
+            },
+            "pgpKeyIds": {
+              "description": "list of PGP key ids for which should be given rpm file valid",
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minLength": 1
+            }
+          },
+          "required": ["pgpKeyIds"],
+          "additionalProperties": false
+        }
+      }
+    }
+  },
+  "required": [
+    "verification"
+  ]
+}
