@@ -5,12 +5,12 @@ verification:
   nonBlockingMode: false
   #  Message which is added to the error response to help user resolve problem
   additionalErrorMessage: |
-    Go to https://cml.avast.com/display/CDS/Signing+JAVA+binaries+in+IDA+environment for more help.
+    Go to https://avast.com/display/xxx/Signing+JAVA+binaries+in+IDA+environment for more help.
   rpm:
     # rpm validation enabled
     enabled: true
     pgpKeyIds:
-      - "ca59abcd"
+      - "xxxx"
   # for which extensions should be used JAR verification
   jar:
 # config file for verisign properties - example and for dev purposes
