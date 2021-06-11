@@ -16,7 +16,9 @@ apply plugin: 'groovy'
 apply plugin: 'application'
 
 group = 'com.avast.server'
-version = version ? version.replaceFirst('v', '') : version // remove 'v' prefix from version when defined from cmd line
+
+// remove 'v' and git ref prefix from version when defined from cmd line (github actions)
+version = version ? version.replaceFirst('refs/tags/', '').replaceFirst('v', '') : version
 
 java {
     sourceCompatibility = JavaVersion.VERSION_11
