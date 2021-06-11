@@ -33,7 +33,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
       - name: Build with Gradle
-        run: ./gradlew build test
+        run: ./gradlew build test packageDistribution
+      - name: Cleanup Gradle Cache
+        # Remove some files from the Gradle cache, so they aren't cached by GitHub Actions.
+        # Restoring these files from a GitHub Actions cache might cause problems for future builds.
+        run: |
+          rm -f ~/.gradle/caches/modules-2/modules-2.lock
+          rm -f ~/.gradle/caches/modules-2/gc.properties
       - name: Create release
         id: create_release
         uses: actions/create-release@v1
@@ -46,24 +52,18 @@ jobs:
             CHANGELOG.md
           draft: true
           prerelease: false
-      - name: Upload release asset
+      - name: Upload release asset - jfrog-verisign.zip
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/libs/jfrog-verisign.jar
-          asset_name: jfrog-verisign.jar
-          asset_content_type: application/java-archive
+          asset_path: ./build/dist/jfrog-verisign.zip
+          asset_name: jfrog-verisign.zip
+          asset_content_type: application/zip
       - name: Publish release
         uses: StuYarrow/publish-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           id: ${{ steps.create_release.outputs.id }}
-      - name: Cleanup Gradle Cache
-          # Remove some files from the Gradle cache, so they aren't cached by GitHub Actions.
-        # Restoring these files from a GitHub Actions cache might cause problems for future builds.
-        run: |
-          rm -f ~/.gradle/caches/modules-2/modules-2.lock
-          rm -f ~/.gradle/caches/modules-2/gc.properties

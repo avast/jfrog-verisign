@@ -90,6 +90,27 @@ task deploy (dependsOn: build, type: Copy) {
     }
 }
 
+tasks.register('copyResult', Copy) {
+    into "$buildDir/toArchive"
+    into('var/etc/artifactory/plugins/lib') {
+        with libsToCopy
+    }
+    into('var/etc/artifactory/plugins') {
+        with groovyToCopy
+    }
+    into('var/etc/artifactory/plugins') {
+        with propertiesToCopy
+    }
+}
+
+tasks.register('packageDistribution', Zip) {
+    dependsOn tasks.named("copyResult")
+    archiveFileName = "jfrog-verisign.zip"
+    destinationDirectory = layout.buildDirectory.dir('dist')
+
+    from layout.buildDirectory.dir("toArchive")
+}
+
 repositories {
     jcenter()
     mavenCentral()
