@@ -16,7 +16,7 @@ apply plugin: 'groovy'
 apply plugin: 'application'
 
 group = 'com.avast.server'
-version = '1.0.0'
+version = version ? version.replaceFirst('v', '') : version // remove 'v' prefix from version when defined from cmd line
 
 java {
     sourceCompatibility = JavaVersion.VERSION_11

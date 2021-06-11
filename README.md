@@ -10,6 +10,7 @@
     * JFrog 7+
 
 It was tested with JFrog API version `artifactory-api:7.12.5`.  
+- [CHANGELOG.md](CHANGELOG.md)
 
 ## Content
 [//]: https://imthenachoman.github.io/nGitHubTOC
