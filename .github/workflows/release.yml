@@ -33,7 +33,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
       - name: Build with Gradle
-        run: ./gradlew test
+        run: ./gradlew build test
       - name: Create release
         id: create_release
         uses: actions/create-release@v1
