@@ -1,9 +1,10 @@
 name: release
 
 on:
-  push:
-    tags:
-      - '*'
+   workflow_dispatch:
+#  push:
+#    tags:
+#      - '*'
 
 # This workflow will build a Java project with Gradle
 # For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
@@ -32,8 +33,10 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
+      - uses: avakar/derive-version@v1.0.0
+        id: version
       - name: Build with Gradle
-        run: ./gradlew build test packageDistribution -Pversion=${{ github.ref }}
+        run: ./gradlew build test packageDistribution -Pversion=${{ steps.version.outputs.version }}
       - name: Cleanup Gradle Cache
         # Remove some files from the Gradle cache, so they aren't cached by GitHub Actions.
         # Restoring these files from a GitHub Actions cache might cause problems for future builds.
@@ -46,8 +49,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          tag_name: v${{ steps.version.outputs.version }}
+          release_name: Release v${{ steps.version.outputs.version }}
           body: |
             [CHANGELOG.md](CHANGELOG.md)
           draft: true
