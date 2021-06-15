@@ -33,7 +33,7 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
-      - uses: avakar/derive-version@v1.0.0
+      - uses: avakar/derive-version@v1.1.0
         id: version
       - name: Build with Gradle
         run: ./gradlew build test packageDistribution -Pversion=${{ steps.version.outputs.version }}
