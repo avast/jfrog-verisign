@@ -7,7 +7,7 @@ buildscript {
 }
 
 plugins {
-    id 'com.coditory.manifest' version '0.1.14'
+    id 'com.coditory.manifest' version '0.2.6'
 }
 
 apply plugin: 'idea'
