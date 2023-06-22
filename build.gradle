@@ -121,6 +121,6 @@ repositories {
 
 dependencies {
     implementation 'org.artifactory:artifactory-api:7.12.5'
-    implementation 'org.spockframework:spock-core:1.1-groovy-2.4'
+    implementation 'org.spockframework:spock-core:2.3-groovy-4.0'
     implementation 'org.jfrog.artifactory.client:artifactory-java-client-services:2.5.1'
 }
